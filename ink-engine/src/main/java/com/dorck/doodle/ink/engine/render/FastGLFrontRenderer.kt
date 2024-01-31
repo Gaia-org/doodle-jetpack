@@ -96,17 +96,20 @@ class FastGLFrontRenderer : GLFrontBufferedRenderer.Callback<DrawSegment> {
         Matrix.multiplyMM(projection, 0, mvpMatrix, 0, transform, 0)
 
         // Clear the screen with black
-        GLES30.glClearColor(0.0f, 0.0f, 0.0f, 1.0f)
+        GLES30.glClearColor(1.0f, 1.0f, 1.0f, 1.0f)
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT)
         // Construct full curve from points
         val curvePoints = mutableListOf<DrawPoint>()
         for (curveSegment in params) {
             curvePoints.addAll(curveSegment.points)
         }
+        if (curvePoints.isEmpty()) {
+            return
+        }
         val curve = DrawCurve(curvePoints, time = System.currentTimeMillis())
         InkDrawingModel.insertCurve(curve)
         Log.d(TAG, "onDrawDoubleBufferedLayer, points size in curve: ${curvePoints.size}")
-        // TODO 优化单次绘制数据，实现布局绘制并且能够保存历史数据
+        // TODO 优化单次绘制数据，实现局部绘制并且能够保存历史数据（只绘制新增区域的内容?）
         InkDrawingModel.getAllCurves().forEach {
             Log.d(TAG, "onDrawDoubleBufferedLayer, draw curve: ${it.id}")
             obtainRenderer().drawCurve(it, projection)
@@ -119,21 +122,15 @@ class FastGLFrontRenderer : GLFrontBufferedRenderer.Callback<DrawSegment> {
     ) {
         super.onDoubleBufferedLayerRenderComplete(frontBufferedLayerSurfaceControl, transaction)
         Log.d(TAG, "onDoubleBufferedLayerRenderComplete")
-        if (isClearState) {
-            GLES30.glClearColor(0.0f, 0.0f, 0.0f, 1.0f)
-            GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT)
-        }
     }
 
     fun attach(surfaceView: SurfaceView) {
-        Log.i(TAG, "attach...")
         mFrontBufferRenderer = GLFrontBufferedRenderer(surfaceView, this)
         mMotionEventPredictor = MotionEventPredictor.newInstance(surfaceView)
         mDrawTouchEventHandler = DrawInkTouchEventHandler(mFrontBufferRenderer!!, mMotionEventPredictor!!)
     }
 
     fun detach() {
-        Log.i(TAG, "detach...")
         mFrontBufferRenderer?.release(true) {
             obtainRenderer().onDestroy()
         }
@@ -141,9 +138,13 @@ class FastGLFrontRenderer : GLFrontBufferedRenderer.Callback<DrawSegment> {
 
     fun clearCanvas() {
         isClearState = true
-        mFrontBufferRenderer?.execute() {
-            mFrontBufferRenderer?.clear()
-        }
+//        mFrontBufferRenderer?.execute() {
+//            GLES30.glClearColor(0.0f, 0.0f, 0.0f, 1.0f)
+//            GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT)
+//            mFrontBufferRenderer?.clear()
+//        }
+        InkDrawingModel.clearAllCurves()
+        mFrontBufferRenderer?.commit()
     }
 
     fun getTouchEventHandler(): DrawInkTouchEventHandler? {

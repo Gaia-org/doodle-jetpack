@@ -54,6 +54,7 @@ class DrawInkTouchEventHandler(
                 val points = mutableListOf<DrawPoint>().apply {
                     add(point)
                 }
+                // TODO 预测点应该只用于快速预览阶段，真实上屏时应该剔除
                 val predictedMotionEvent = motionEventPredictor.predict()
                 if (predictedMotionEvent != null) {
                     Log.d(TAG, "handleTouchEvent, has predict point: ${predictedMotionEvent.x}, ${predictedMotionEvent.y}")
