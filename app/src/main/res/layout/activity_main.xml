@@ -10,7 +10,8 @@
         android:id="@+id/renderContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/toolPanel"/>
+        android:layout_above="@+id/toolPanel"
+        android:background="@color/white"/>
 
     <LinearLayout
         android:id="@+id/toolPanel"

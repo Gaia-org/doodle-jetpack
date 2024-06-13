@@ -2,10 +2,13 @@ package com.dorck.doodle.ink.engine.touch
 
 import android.util.Log
 import android.view.MotionEvent
+import android.view.View
 import androidx.graphics.lowlatency.GLFrontBufferedRenderer
 import androidx.input.motionprediction.MotionEventPredictor
 import com.dorck.doodle.ink.engine.data.DrawPoint
 import com.dorck.doodle.ink.engine.data.DrawSegment
+import com.dorck.doodle.ink.engine.interpolator.CurvePointInterpolator
+import kotlinx.coroutines.delay
 
 /**
  * 收集和处理点数据，为后续笔记渲染做数据支撑
@@ -20,14 +23,16 @@ class DrawInkTouchEventHandler(
     private var mCurrentX: Float = 0f
     private var mCurrentY: Float = 0f
 
-    override fun handleTouchEvent(event: MotionEvent): Boolean {
+    override fun handleTouchEvent(event: MotionEvent, view: View): Boolean {
         motionEventPredictor.record(event)
 
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 Log.d(TAG, "handleTouchEvent, down")
+//                view.requestUnbufferedDispatch(event)
                 mCurrentX = event.x
                 mCurrentY = event.y
+
                 val point = DrawPoint(
                     mCurrentX, mCurrentY,
                     pressure = event.pressure,
@@ -35,7 +40,7 @@ class DrawInkTouchEventHandler(
                     orientation = event.orientation,
                     time = event.eventTime
                 )
-                frontRenderer.renderFrontBufferedLayer(DrawSegment(listOf(point)))
+                frontRenderer.renderFrontBufferedLayer(DrawSegment(mutableListOf(point), System.currentTimeMillis()))
             }
 
             MotionEvent.ACTION_MOVE -> {
@@ -56,9 +61,10 @@ class DrawInkTouchEventHandler(
                 }
                 // TODO 预测点应该只用于快速预览阶段，真实上屏时应该剔除
                 val predictedMotionEvent = motionEventPredictor.predict()
+                val predictPoints = mutableListOf<DrawPoint>()
                 if (predictedMotionEvent != null) {
                     Log.d(TAG, "handleTouchEvent, has predict point: ${predictedMotionEvent.x}, ${predictedMotionEvent.y}")
-                    points.add(
+                    predictPoints.add(
                         DrawPoint(
                             predictedMotionEvent.x,
                             predictedMotionEvent.y,
@@ -69,7 +75,7 @@ class DrawInkTouchEventHandler(
                         )
                     )
                 }
-                frontRenderer.renderFrontBufferedLayer(DrawSegment(points))
+                frontRenderer.renderFrontBufferedLayer(DrawSegment(points, System.currentTimeMillis(), predictPoints))
             }
 
             MotionEvent.ACTION_UP -> {

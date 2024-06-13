@@ -14,7 +14,7 @@ abstract class AbsBrushRenderer {
     open var isInitialized = false
     open var mBrushData: BrushData? = null
     open var mColors: FloatArray? = null
-    open var mBrushSize: Float = 6f
+    open var mBrushSize: Float = 36f
     open var mAlpha: Int = 255
 
     abstract val mVertexShader: String

@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.dorck.doodle.ink.engine.data.BrushData
 import com.dorck.doodle.ink.engine.data.BrushType
 import com.dorck.doodle.ink.engine.render.FastGLFrontRenderer
+import com.dorck.doodle.playground.demo.CustomCanvasView
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
@@ -20,11 +21,12 @@ class MainActivity : AppCompatActivity() {
 //        }
 
         val brushConfig = BrushData(BrushType.INK, color = Color.WHITE, size = 16f)
-        val fastRenderer = FastGLFrontRenderer().apply {
+        val fastRenderer = FastGLFrontRenderer(this).apply {
             applyBrushConfig(brushConfig)
         }
         val inkSurfaceView = InkSurfaceView(this, fastRenderer)
         container.addView(inkSurfaceView)
+//        container.addView(CustomCanvasView(this))
         val colorButton = findViewById<TextView>(R.id.buttonColor)
         colorButton.setOnClickListener {
             val genColor = generateRandomColor()

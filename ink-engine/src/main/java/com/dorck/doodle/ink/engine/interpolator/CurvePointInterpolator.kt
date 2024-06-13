@@ -14,7 +14,7 @@ import kotlin.math.abs
  *
  * @author Dorck
  */
-class CurvePointInterpolator(private val drawPoints: List<DrawPoint>, private val curveBendingThreshold: Float = 2.0f) {
+class CurvePointInterpolator(private val drawPoints: MutableList<DrawPoint>, private val curveBendingThreshold: Float = 2.0f) {
     private var mStartPoint: DrawPoint = DrawPoint(0f, 0f)
     private var mProcessedPoints: MutableList<DrawPoint> = mutableListOf()
     private var mPath: Path = Path()
@@ -99,6 +99,13 @@ class CurvePointInterpolator(private val drawPoints: List<DrawPoint>, private va
     }
 
     fun getProcessingPoints(): List<DrawPoint> = mProcessedPoints
+
+    fun addPointToPath(drawPoint: DrawPoint) {
+        mProcessedPoints.clear()
+        drawPoints.add(drawPoint)
+        fillCurvePoints(drawPoint)
+        mStartPoint = drawPoint
+    }
 
     companion object {
         private val TAG = CurvePointInterpolator::class.java.simpleName

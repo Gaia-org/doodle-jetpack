@@ -72,7 +72,8 @@ class InkRenderer : AbsBrushRenderer() {
             val point = points[pointIndex]
             pointData[pointIndex * 4] = point.x
             pointData[pointIndex * 4 + 1] = point.y
-            pointData[pointIndex * 4 + 2] = mBrushSize / 4.0f + mBrushSize * point.pressure
+            // pointData[pointIndex * 4 + 2] = mBrushSize / 4.0f + mBrushSize * point.pressure
+            pointData[pointIndex * 4 + 2] = mBrushSize * 1.5f
             pointData[pointIndex * 4 + 3] = 0.5f
         }
         pointFloatBuffer.put(pointData)

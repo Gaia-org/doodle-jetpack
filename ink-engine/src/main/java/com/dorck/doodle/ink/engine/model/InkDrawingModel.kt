@@ -23,7 +23,7 @@ object InkDrawingModel : BaseModel() {
         val originSize = drawCurve.drawPoints.size
         mCurCurve = drawCurve
         // 曲线拟合、插值处理
-        val curvePointInterpolator = CurvePointInterpolator(drawCurve.drawPoints).apply {
+        val curvePointInterpolator = CurvePointInterpolator(drawCurve.drawPoints.toMutableList()).apply {
             processCurveFitting()
             drawCurve.drawPoints = getProcessingPoints()
             mTotalPointsSize += drawCurve.drawPoints.size
